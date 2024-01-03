@@ -1,6 +1,6 @@
-# mytodo
+# Todo-List-App
 
-A new Flutter project.
+A simple todo list app for android.
 
 ## Getting Started
 
