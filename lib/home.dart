@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mytodo/todo.dart';
+import 'package:mytodo/task.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -11,29 +11,29 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
 
 
-  List<Todo> todos = [
-    Todo('1. Buy bread and milk.\n2. Buy juice.\n'
-        '3. Do something great to have a good memory when remembered.', false),
-    Todo('title', false)
+  List<Task> tasks = [
+    Task('1. Buy bread and milk.', false),
+    Task('Buy juice.', false),
+    Task('Do something great for the day.', false)
   ];
 
   String title = '';
 
-  void addTodoItem(String title, bool completed){
+  void addTaskItem(String title, bool completed){
     setState(() {
-      todos.add(Todo(title, false));
+      tasks.add(Task(title, false));
     });
   }
 
-  void _completeTodo(Todo todo) {
+  void _completeTask(Task task) {
     setState(() {
-      todo.completed = !todo.completed;
+      task.completed = !task.completed;
     });
   }
 
-  void _deleteTodo(Todo todo) {
+  void _deleteTask(Task task) {
     setState(() {
-      todos.removeWhere((element) => element.title == todo.title);
+      tasks.removeWhere((element) => element.title == task.title);
     });
   }
 
@@ -48,11 +48,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
-        children: todos.map((Todo todo) {
-          return TodoItem(
-            todo: todo,
-            completeTodo: _completeTodo,
-            deleteTodo: _deleteTodo,
+        children: tasks.map((Task todo) {
+          return TaskItem(
+            task: todo,
+            completeTask: _completeTask,
+            deleteTask: _deleteTask,
           );
         }).toList(),
       ),
@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             onPressed: (){
                               if(title.isNotEmpty){
-                                addTodoItem(title, false);
+                                addTaskItem(title, false);
                                 Navigator.pop(context);
                               }
                             },

@@ -1,28 +1,20 @@
-
 import 'package:flutter/material.dart';
 
-class Todo {
+class Task {
 
-  Todo(this.title, this.completed);
+  Task(this.title, this.completed);
 
   String title;
   bool completed;
 
 }
 
-class TodoItem extends StatefulWidget {
-  const TodoItem({super.key, required this.todo, required this.completeTodo, required this.deleteTodo});
+class TaskItem extends StatelessWidget {
+  const TaskItem({super.key, required this.task, required this.completeTask, required this.deleteTask});
 
-  final Todo todo;
-  final void Function(Todo todo) completeTodo;
-  final void Function(Todo todo) deleteTodo;
-
-  @override
-  State<TodoItem> createState() => _TodoItemState();
-}
-
-class _TodoItemState extends State<TodoItem> {
-
+  final Task task;
+  final void Function(Task todo) completeTask;
+  final void Function(Task todo) deleteTask;
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +34,9 @@ class _TodoItemState extends State<TodoItem> {
               // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Checkbox(
-                  value: widget.todo.completed,
+                  value: task.completed,
                   onChanged: (value){
-                    widget.completeTodo(widget.todo);
+                    completeTask(task);
                   },
                 ),
 
@@ -55,11 +47,11 @@ class _TodoItemState extends State<TodoItem> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.todo.title,
+                          task.title,
                           style: TextStyle(
                             fontSize: 16,
                             // fontWeight: FontWeight.bold,
-                            decoration: widget.todo.completed ? TextDecoration.lineThrough : null,
+                            decoration: task.completed ? TextDecoration.lineThrough : null,
                           ),
                         ),
                       ],
@@ -79,7 +71,7 @@ class _TodoItemState extends State<TodoItem> {
                             TextButton(
                               onPressed: () {
                                 // delete the item
-                                widget.deleteTodo(widget.todo);
+                                deleteTask(task);
                                 Navigator.pop(context);
                               },
                               child: const Text(
@@ -110,51 +102,5 @@ class _TodoItemState extends State<TodoItem> {
         ),
       ),
     );
-    // return Card(
-    //   elevation: 2,
-    //   child: ListTile(
-    //     onLongPress: (){
-    //       showMenu(
-    //         context: context,
-    //         position: const RelativeRect.fromLTRB(100, 100, 0, 0),
-    //         items: [
-    //           const PopupMenuItem(
-    //             child: Text('Edit'),
-    //           ),
-    //           const PopupMenuItem(
-    //             child: Text('Delete'),
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //     leading: Checkbox(
-    //       activeColor: Colors.lightBlueAccent,
-    //       value: widget.todo.completed,
-    //       onChanged: (value){
-    //         _handleTodoChange(widget.todo);
-    //       },
-    //     ),
-    //     title: Text(widget.todo.description,
-    //       style: const TextStyle(
-    //         // color: Colors.green,
-    //           fontSize: 16
-    //       ),
-    //     ),
-    //     trailing: PopupMenuButton(
-    //       itemBuilder: (context) {
-    //         return [
-    //           const PopupMenuItem(
-    //             value: 'edit',
-    //             child: Text('Edit'),
-    //           ),
-    //           const PopupMenuItem(
-    //             value: 'delete',
-    //             child: Text('Delete'),
-    //           ),
-    //         ];
-    //       },
-    //     ),
-    //   ),
-    // );
   }
 }

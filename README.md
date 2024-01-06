@@ -2,9 +2,9 @@
 
 A simple todo list app for android.
 
-## Getting Started
+![screenshot.png](screenshot.png)
 
-This project is a starting point for a Flutter application.
+## Getting Started
 
 A few resources to get you started if this is your first Flutter project:
 
