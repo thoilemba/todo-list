@@ -1,92 +1,129 @@
-
 import 'package:flutter/material.dart';
 
-class Todo {
-
-  Todo(this.title, this.completed);
+class Task {
+  Task(this.title, this.completed);
 
   String title;
   bool completed;
 
+  // converting Task object into a Map<String, dynamic>.
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'completed': completed,
+    };
+  }
+
+  // named constructor used for creating Task object from Map<String, dynamic>
+  Task.fromMap(Map<String, dynamic> map)
+      : title = map['title'],
+        completed = map['completed'];
 }
 
-class TodoItem extends StatefulWidget {
-  const TodoItem({super.key, required this.todo, required this.completeTodo, required this.deleteTodo});
+// TaskItem class contains the checkbox, title and delete button
+class TaskItem extends StatelessWidget {
+  const TaskItem(
+      {super.key,
+      required this.task,
+      required this.completeTask,
+      required this.deleteTask});
 
-  final Todo todo;
-  final void Function(Todo todo) completeTodo;
-  final void Function(Todo todo) deleteTodo;
-
-  @override
-  State<TodoItem> createState() => _TodoItemState();
-}
-
-class _TodoItemState extends State<TodoItem> {
-
+  final Task task;
+  final void Function(Task todo) completeTask;
+  final void Function(Task todo) deleteTask;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(5.0),
+      padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 5),
       child: Container(
         padding: const EdgeInsets.only(top: 8, bottom: 8),
         decoration: BoxDecoration(
-          // color: Theme.of(context).colorScheme.inversePrimary,
-          color: const Color.fromARGB(255, 209, 228, 255),
-          borderRadius: BorderRadius.circular(12)
-        ),
+            color: const Color.fromARGB(255, 209, 228, 255),
+            borderRadius: BorderRadius.circular(12)),
         child: Column(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Checkbox(
-                  value: widget.todo.completed,
-                  onChanged: (value){
-                    widget.completeTodo(widget.todo);
+                  value: task.completed,
+                  onChanged: (value) {
+                    completeTask(task);
                   },
                 ),
-
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(0.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.todo.title,
-                          style: TextStyle(
-                            fontSize: 16,
-                            // fontWeight: FontWeight.bold,
-                            decoration: widget.todo.completed ? TextDecoration.lineThrough : null,
-                          ),
-                        ),
-                      ],
+                  child: GestureDetector(
+                    onLongPress: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            content: Text(
+                              task.title,
+                              // textAlign: TextAlign.center,
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  completeTask(task);
+                                  Navigator.pop(context);
+                                },
+                                child: task.completed
+                                    ? const Text(
+                                        "Mark as incomplete",
+                                        style: TextStyle(color: Colors.black54),
+                                      )
+                                    : const Text(
+                                        "Mark as complete",
+                                        style: TextStyle(color: Colors.green),
+                                      ),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  deleteTask(task);
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text(
+                                  "Delete",
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: Text(
+                      task.title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        decoration: task.completed ? TextDecoration.lineThrough : null,
+                        decorationThickness: 2,
+                        decorationColor: Colors.black54,
+                      ),
                     ),
                   ),
                 ),
-
                 IconButton(
-                  onPressed: (){
+                  onPressed: () {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
                           title: const Text("Delete Task"),
-                          content: const Text("Do you want to delete this task?"),
+                          content:
+                              const Text("Do you want to delete this task?"),
                           actions: [
                             TextButton(
                               onPressed: () {
                                 // delete the item
-                                widget.deleteTodo(widget.todo);
+                                deleteTask(task);
                                 Navigator.pop(context);
                               },
                               child: const Text(
                                 "Yes",
-                                style: TextStyle(
-                                  color: Colors.red
-                                ),
+                                style: TextStyle(color: Colors.red),
                               ),
                             ),
                             TextButton(
@@ -110,51 +147,5 @@ class _TodoItemState extends State<TodoItem> {
         ),
       ),
     );
-    // return Card(
-    //   elevation: 2,
-    //   child: ListTile(
-    //     onLongPress: (){
-    //       showMenu(
-    //         context: context,
-    //         position: const RelativeRect.fromLTRB(100, 100, 0, 0),
-    //         items: [
-    //           const PopupMenuItem(
-    //             child: Text('Edit'),
-    //           ),
-    //           const PopupMenuItem(
-    //             child: Text('Delete'),
-    //           ),
-    //         ],
-    //       );
-    //     },
-    //     leading: Checkbox(
-    //       activeColor: Colors.lightBlueAccent,
-    //       value: widget.todo.completed,
-    //       onChanged: (value){
-    //         _handleTodoChange(widget.todo);
-    //       },
-    //     ),
-    //     title: Text(widget.todo.description,
-    //       style: const TextStyle(
-    //         // color: Colors.green,
-    //           fontSize: 16
-    //       ),
-    //     ),
-    //     trailing: PopupMenuButton(
-    //       itemBuilder: (context) {
-    //         return [
-    //           const PopupMenuItem(
-    //             value: 'edit',
-    //             child: Text('Edit'),
-    //           ),
-    //           const PopupMenuItem(
-    //             value: 'delete',
-    //             child: Text('Delete'),
-    //           ),
-    //         ];
-    //       },
-    //     ),
-    //   ),
-    // );
   }
 }

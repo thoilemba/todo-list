@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mytodo/todo.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -10,30 +12,58 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
+  late SharedPreferences prefs;
 
-  List<Todo> todos = [
-    Todo('1. Buy bread and milk.\n2. Buy juice.\n'
-        '3. Do something great to have a good memory when remembered.', false),
-    Todo('title', false)
-  ];
+  List<Task> tasks = [];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadTodoItems();
+  }
+
+  // task name, will be taken from the text field
   String title = '';
 
-  void addTodoItem(String title, bool completed){
+  // Load the list of tasks and assigned to the tasks
+  Future<void> _loadTodoItems() async {
+    prefs = await SharedPreferences.getInstance();
+    final List<String>? savedTasks = prefs.getStringList('tasks');
+    if (savedTasks != null) {
+      setState(() {
+        // creating the task objects using fromMap() from the json by converting into Map
+        tasks = savedTasks.map((task) {
+          Map<String, dynamic> taskMap = json.decode(task);
+          return Task.fromMap(taskMap);
+        }).toList();
+      });
+    }
+  }
+
+  // Saving the list of tasks by converting the task object into Map using toMap() and then to json
+  void _saveTaskItems() {
+    final List<String> encodedTasks = tasks.map((task) => json.encode(task.toMap())).toList();
+    prefs.setStringList('tasks', encodedTasks);
+  }
+
+  void addTaskItem(String title, bool completed){
     setState(() {
-      todos.add(Todo(title, false));
+      tasks.add(Task(title, false));
+      _saveTaskItems();
     });
   }
 
-  void _completeTodo(Todo todo) {
+  void _completeTask(Task task) {
     setState(() {
-      todo.completed = !todo.completed;
+      task.completed = !task.completed;
+      _saveTaskItems();
     });
   }
 
-  void _deleteTodo(Todo todo) {
+  void _deleteTask(Task task) {
     setState(() {
-      todos.removeWhere((element) => element.title == todo.title);
+      tasks.removeWhere((element) => element.title == task.title);
+      _saveTaskItems();
     });
   }
 
@@ -47,16 +77,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        children: todos.map((Todo todo) {
-          return TodoItem(
-            todo: todo,
-            completeTodo: _completeTodo,
-            deleteTodo: _deleteTodo,
+        padding: const EdgeInsets.only(top: 4, bottom: 74),
+        children: tasks.map((Task todo) {
+          return TaskItem(
+            task: todo,
+            completeTask: _completeTask,
+            deleteTask: _deleteTask,
           );
         }).toList(),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor:  Theme.of(context).colorScheme.inversePrimary,
         tooltip: 'Add task',
         onPressed: () {
           showModalBottomSheet(
@@ -81,7 +112,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           'Add Task',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.lightBlueAccent,
+                            color: Color.fromARGB(255, 158, 202, 255),
+                            fontWeight: FontWeight.bold,
                             fontSize: 20,
                           ),
                         ),
@@ -92,11 +124,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           maxLines: 2,
                           decoration: const InputDecoration(
                             enabledBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blue, width: 3.0),
+                              borderSide: BorderSide(
+                                color: Color.fromARGB(255, 158, 202, 255),
+                                width: 3.0,
+                              ),
                               borderRadius: BorderRadius.all(Radius.circular(12.0),),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blue, width: 3.0),
+                              borderSide: BorderSide(
+                                color: Color.fromARGB(255, 158, 202, 255),
+                                width: 3.0,
+                              ),
                               borderRadius: BorderRadius.all(Radius.circular(12.0),),
                             ),
                             hintText: "Enter task",
@@ -113,11 +151,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         TextButton(
                             style: const ButtonStyle(
-                              backgroundColor: MaterialStatePropertyAll<Color>(Colors.lightBlueAccent),
+                              backgroundColor: MaterialStatePropertyAll<Color>(
+                                Color.fromARGB(255, 158, 202, 255),
+                              ),
                             ),
                             onPressed: (){
                               if(title.isNotEmpty){
-                                addTodoItem(title, false);
+                                addTaskItem(title, false);
                                 Navigator.pop(context);
                               }
                             },
@@ -125,6 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               'Add',
                               style: TextStyle(
                                 color: Colors.white,
+                                fontSize: 16,
                               ),
                             )
                         ),
