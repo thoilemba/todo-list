@@ -1,20 +1,50 @@
 import 'package:flutter/material.dart';
 
+/*
+  This task.dart file optional.
+  If we want to used the todolist items as object,
+  Use these two class: Task and TaskItem
+ */
+
+// This class represent each single todolist item
 class Task {
 
-  Task(this.title, this.completed);
+  Task(this.id, this.title, this.completed, this.createdAt);
 
+  int id;
   String title;
-  bool completed;
+  int completed;
+  String createdAt;
+
+  // converting Task object into a Map<String, dynamic>.
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'completed': completed,
+      'createdAt': createdAt,
+    };
+  }
+
+  // named constructor used for creating Task object from Map<String, dynamic>
+  Task.fromMap(Map<String, dynamic> map)
+      : id = map['id'],
+        title = map['title'],
+        completed = map['completed'],
+        createdAt = map['createdAt'];
 
 }
 
+/*
+  This class provides each rounded container that contains checkbox, task title and delete icon
+  Custom design for the ListTile Widget
+ */
 class TaskItem extends StatelessWidget {
-  const TaskItem({super.key, required this.task, required this.completeTask, required this.deleteTask});
+  const TaskItem({super.key, required this.task, required this.deleteTask, required this.updateTask});
 
   final Task task;
-  final void Function(Task todo) completeTask;
-  final void Function(Task todo) deleteTask;
+  final Future<void> Function(int id) deleteTask;
+  final Future<void> Function(int id, String title, int completed) updateTask;
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +64,10 @@ class TaskItem extends StatelessWidget {
               // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Checkbox(
-                  value: task.completed,
+                  value: task.completed == 1 ? true : false,
                   onChanged: (value){
-                    completeTask(task);
+                    // completeTask(task);
+                    updateTask(task.id, task.title, task.completed);
                   },
                 ),
 
@@ -51,7 +82,7 @@ class TaskItem extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             // fontWeight: FontWeight.bold,
-                            decoration: task.completed ? TextDecoration.lineThrough : null,
+                            decoration: task.completed == 1 ? TextDecoration.lineThrough : null,
                           ),
                         ),
                       ],
@@ -71,7 +102,7 @@ class TaskItem extends StatelessWidget {
                             TextButton(
                               onPressed: () {
                                 // delete the item
-                                deleteTask(task);
+                                deleteTask(task.id);
                                 Navigator.pop(context);
                               },
                               child: const Text(
