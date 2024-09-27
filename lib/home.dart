@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mytodo/database_helper.dart';
+import 'package:mytodo/utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -9,7 +10,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-
   // TODO: Use this if we want to used the Task class and TaskItem class
   // List<Task> tasks = [];
   // void _loadAllTasks() async {
@@ -43,10 +43,11 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadAllTasks();
   }
 
-  Future<void> _updateTask(int id, String title, int completed, String createdAt) async {
-    if(completed == 1){
+  Future<void> _updateTask(
+      int id, String title, int completed, String createdAt) async {
+    if (completed == 1) {
       completed = 0;
-    }else{
+    } else {
       completed = 1;
     }
     await DatabaseHelper.updateItem(id, title, completed, createdAt);
@@ -84,53 +85,102 @@ class _HomeScreenState extends State<HomeScreen> {
       //     );
       //   }).toList(),
       // ),
-      body: ListView.builder(
-        itemCount: _todoList.length,
-        itemBuilder: (context, index) {
-          final task = _todoList[index];
-          return Card(
-            // elevation: 3,
-            color: const Color.fromARGB(255, 209, 228, 255),
-            child: ListTile(
-              leading: SizedBox(
-                width: 10,
-                child: Checkbox(
-                  value: task['completed'] == 1 ? true : false,
-                  onChanged: (value){
-                    // completeTask(task);
-                    _updateTask(task["id"], task['title'], task['completed'], task['createdAt']);
-                  },
-                ),
+      body: _todoList.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'No task',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    '(Press the "+" button to add task)',
+                    style: TextStyle(
+                      // fontSize: 16,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                ],
               ),
-              title: Text(
-                task['title'],
-                style: TextStyle(
-                  fontSize: 18,
-                  // fontWeight: FontWeight.bold,
-                  decoration: task['completed'] == 1 ? TextDecoration.lineThrough : null,
-                ),
-              ),
-              subtitle: Text('Created at: ${task['createdAt']}'),
-              trailing: SizedBox(
-                width: 20,
-                child: IconButton(
-                  onPressed: () {
-                    _deleteTask(task['id']);
-                  },
-                  icon: const Icon(Icons.delete),
-
-                ),
-              ),
-              // onTap: () {
-              //   // Handle the tap on the list item
-              //   print('Tapped on ${task['title']}');
-              // },
+            )
+          : ListView.builder(
+              itemCount: _todoList.length,
+              itemBuilder: (context, index) {
+                final task = _todoList[index];
+                return Card(
+                  // elevation: 3,
+                  color: const Color.fromARGB(255, 209, 228, 255),
+                  child: ListTile(
+                    leading: SizedBox(
+                      width: 10,
+                      child: Checkbox(
+                        value: task['completed'] == 1 ? true : false,
+                        onChanged: (value) {
+                          // completeTask(task);
+                          _updateTask(task["id"], task['title'],
+                              task['completed'], task['createdAt']);
+                        },
+                      ),
+                    ),
+                    title: Text(
+                      task['title'],
+                      style: TextStyle(
+                        fontSize: 18,
+                        // fontWeight: FontWeight.bold,
+                        decoration: task['completed'] == 1
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
+                    ),
+                    subtitle: Text(
+                        Utility.getMyFormattedDateTime(task['createdAt'])),
+                    trailing: IconButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text("Delete Task"),
+                              content: const Text(
+                                  "Do you want to delete this task?"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    // delete the item
+                                    _deleteTask(task['id']);
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text(
+                                    "Yes",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text("No"),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      icon: const Icon(Icons.delete),
+                    ),
+                    // onTap: () {
+                    //   // Handle the tap on the list item
+                    //   print('Tapped on ${task['title']}');
+                    // },
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor:  Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         tooltip: 'Add task',
         onPressed: () {
           showModalBottomSheet(
@@ -138,7 +188,8 @@ class _HomeScreenState extends State<HomeScreen> {
             context: context,
             builder: (context) => SingleChildScrollView(
               child: Container(
-                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context).viewInsets.bottom),
                 child: Container(
                   padding: const EdgeInsets.all(20),
                   decoration: const BoxDecoration(
@@ -150,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children:  [
+                    children: [
                       const Text(
                         'Add Task',
                         textAlign: TextAlign.center,
@@ -166,19 +217,23 @@ class _HomeScreenState extends State<HomeScreen> {
                         maxLines: 2,
                         decoration: const InputDecoration(
                           enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blue, width: 3.0),
-                            borderRadius: BorderRadius.all(Radius.circular(12.0),),
+                            borderSide:
+                                BorderSide(color: Colors.blue, width: 3.0),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(12.0),
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blue, width: 3.0),
-                            borderRadius: BorderRadius.all(Radius.circular(12.0),),
+                            borderSide:
+                                BorderSide(color: Colors.blue, width: 3.0),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(12.0),
+                            ),
                           ),
                           hintText: "Enter task",
-                          hintStyle: TextStyle(
-                              color: Colors.grey
-                          ),
+                          hintStyle: TextStyle(color: Colors.grey),
                         ),
-                        onChanged: (newTitle){
+                        onChanged: (newTitle) {
                           title = newTitle;
                         },
                       ),
@@ -187,10 +242,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       TextButton(
                           style: const ButtonStyle(
-                            backgroundColor: MaterialStatePropertyAll<Color>(Colors.lightBlueAccent),
+                            backgroundColor: MaterialStatePropertyAll<Color>(
+                                Colors.lightBlueAccent),
                           ),
-                          onPressed: (){
-                            if(title.isNotEmpty){
+                          onPressed: () {
+                            if (title.isNotEmpty) {
                               // addTaskItem(title, false);
                               _addTask(title, 0);
                               Navigator.pop(context);
@@ -201,8 +257,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             style: TextStyle(
                               color: Colors.white,
                             ),
-                          )
-                      ),
+                          )),
                     ],
                   ),
                 ),
